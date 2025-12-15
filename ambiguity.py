@@ -69,3 +69,35 @@ Constraints:
 - Do NOT provide grammar correction.
 """
     return amutils.llm_json(client, system=system, user=user, temperature=0.2)
+
+# Step 2 (optional): normalize/dedupe interpretations
+def normalize_analysis(
+    client: OpenAI,
+    analysis: Dict[str, Any],
+) -> Dict[str, Any]:
+    """
+    Second pass to:
+    - remove near-duplicate interpretations
+    - ensure IDs are sequential (I1..In)
+    - ensure types adhere to allowed labels
+    - keep content descriptive, not judgmental
+
+    This is helpful for demo polish and stability.
+    """
+    system = "You are a careful JSON editor and linguistics analyst. You fix structure and deduplicate interpretations without changing meaning."
+    user = f"""
+You will receive a JSON analysis output. Your job:
+- Keep the same overall schema and keys.
+- Remove duplicate/overlapping interpretations (merge if needed).
+- Ensure each interpretation is genuinely distinct.
+- Ensure IDs are sequential: I1, I2, ...
+- Ensure "ambiguity_types" is consistent with interpretations.
+- Do NOT add new interpretations unless required to fix a missing obvious reading already implied by the analysis.
+- Do NOT add judgmental language. Do NOT do grammar correction.
+
+Here is the JSON to normalize:
+{json.dumps(analysis, ensure_ascii=False, indent=2)}
+
+Return ONLY the corrected JSON object.
+"""
+    return amutils.llm_json(client, system=system, user=user, temperature=0.1)
