@@ -37,3 +37,30 @@ def run_demo():
         print("\n--- Analysis (JSON) ---")
         print(json.dumps(analysis, ensure_ascii=False, indent=2))
 
+def main():
+    # If user supplies text via CLI args, analyze that instead of demos.
+    # Example:
+    #   python ambiguity_tool.py "I saw the man with the telescope."
+    try:
+        client = amconfig._client()
+
+        if len(sys.argv) > 1:
+            text = " ".join(sys.argv[1:]).strip()
+            if not text:
+                raise ValueError("Empty input text.")
+            analysis = ambiguity.analyze_ambiguity(client, text, language_context="English", max_interpretations=8)
+            analysis = ambiguity.normalize_analysis(client, analysis)
+            print(json.dumps(analysis, ensure_ascii=False, indent=2))
+        else:
+            run_demo()
+
+    except KeyboardInterrupt:
+        print("\nInterrupted.", file=sys.stderr)
+        sys.exit(130)
+    except Exception as e:
+        print(f"\nERROR: {e}", file=sys.stderr)
+        sys.exit(1)
+
+
+if __name__ == "__main__":
+    main()
