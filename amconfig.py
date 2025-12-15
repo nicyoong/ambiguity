@@ -25,3 +25,28 @@ Rules:
 - If discourse context is needed to resolve a referent, state that in notes without inventing context.
 - Only enumerate interpretations that are grammatically licensed by the surface form; do not posit silent syntactic constructions.
 """
+
+def _ensure_env() -> str:
+    load_dotenv()
+    api_key = os.getenv("OPENROUTER_API_KEY", "").strip()
+    if not api_key:
+        raise RuntimeError(
+            "Missing OPENROUTER_API_KEY. Put it in your .env file:\n"
+            "  OPENROUTER_API_KEY=your_key_here"
+        )
+    return api_key
+
+
+def _client() -> OpenAI:
+    api_key = _ensure_env()
+
+    # Optional OpenRouter metadata headers (safe defaults).
+    # You can change or remove these freely.
+    return OpenAI(
+        api_key=api_key,
+        base_url=BASE_URL,
+        default_headers={
+            "HTTP-Referer": "http://localhost",
+            "X-Title": "ambiguity-detector-prototype",
+        },
+    )
