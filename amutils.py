@@ -36,3 +36,20 @@ def _extract_json_object(text: str) -> Optional[str]:
 
     return None
 
+def _try_parse_json(text: str) -> Optional[Dict[str, Any]]:
+    """
+    Attempts to parse JSON from model output.
+    Strips Markdown backticks and tries to extract a JSON object.
+    """
+    if not text:
+        return None
+
+    cleaned = text.strip()
+    cleaned = cleaned.replace("```json", "").replace("```", "").replace("`", "").strip()
+
+    candidate = _extract_json_object(cleaned) or cleaned
+    try:
+        return json.loads(candidate)
+    except Exception:
+        return None
+
