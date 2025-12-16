@@ -36,3 +36,31 @@ async def send_json_chunks(interaction: discord.Interaction, payload: dict):
         await interaction.followup.send(
             f"**Part {i}/{total}**\n```json\n{chunk}\n```"
         )
+
+@tree.command(
+    name="ambiguity",
+    description="Analyze linguistic ambiguity in a sentence or short paragraph"
+)
+@app_commands.describe(
+    text="Sentence or short paragraph to analyze",
+    max_interpretations="Maximum number of interpretations (default: 6)"
+)
+async def ambiguity_command(
+    interaction: discord.Interaction,
+    text: str,
+    max_interpretations: int = 6,
+):
+    await interaction.response.defer(thinking=True)
+
+    async with analysis_lock:
+        client_llm = amconfig._client()
+
+        analysis = await asyncio.to_thread(
+            ambiguity.analyze_ambiguity,
+            client_llm,
+            text,
+            "English",
+            max_interpretations
+        )
+
+    await send_json_chunks(interaction, analysis)
