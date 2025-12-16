@@ -64,3 +64,33 @@ async def ambiguity_command(
         )
 
     await send_json_chunks(interaction, analysis)
+
+@tree.command(
+    name="ambiguity_normalize",
+    description="Normalize and deduplicate an ambiguity analysis JSON"
+)
+@app_commands.describe(
+    analysis_json="Raw ambiguity analysis JSON (paste full JSON)"
+)
+async def ambiguity_normalize_command(
+    interaction: discord.Interaction,
+    analysis_json: str,
+):
+    await interaction.response.defer(thinking=True)
+
+    try:
+        analysis = json.loads(analysis_json)
+    except json.JSONDecodeError:
+        await interaction.followup.send("❌ Invalid JSON input.")
+        return
+
+    async with analysis_lock:
+        client_llm = amconfig._client()
+
+        normalized = await asyncio.to_thread(
+            ambiguity.normalize_analysis,
+            client_llm,
+            analysis
+        )
+
+    await send_json_chunks(interaction, normalized)
