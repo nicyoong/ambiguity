@@ -94,3 +94,10 @@ async def ambiguity_normalize_command(
         )
 
     await send_json_chunks(interaction, normalized)
+
+@client.event
+async def on_ready():
+    await tree.sync()
+    print(f"Logged in as {client.user}")
+
+client.run(TOKEN)
