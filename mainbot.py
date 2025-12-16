@@ -97,6 +97,7 @@ async def ambiguity_normalize_command(
 
 @client.event
 async def on_ready():
+    asyncio.create_task(amutils.checktime())
     await tree.sync()
     print(f"Logged in as {client.user}")
 

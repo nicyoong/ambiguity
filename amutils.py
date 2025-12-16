@@ -1,5 +1,8 @@
+import asyncio
 import amconfig
 import json
+import random
+import time
 from openai import OpenAI
 from typing import Any, Dict, Optional
 
@@ -81,3 +84,8 @@ def llm_json(
             "------------------\n"
         )
     return parsed
+
+async def checktime():
+    while True:
+        print(f"{time.strftime('%Y-%m-%d %H:%M:%S')}")
+        await asyncio.sleep(random.randint(10 * 60, 14 * 60))
